@@ -1,8 +1,5 @@
 #if RW_1_6_OR_GREATER
 
-using System;
-using System.Collections.Generic;
-using System.Reflection;
 using HarmonyLib;
 using LunarFramework.Patching;
 using RimWorld.Planet;
@@ -12,16 +9,14 @@ namespace GeologicalLandforms.Patches;
 
 /// <summary>
 /// Keeps quest sites off impassable tiles by capping maxHilliness on the queries made while a quest
-/// site is being selected, rather than by making CanSettleOnTile answer differently during quest
-/// generation. The query compares the tile's own hilliness, so the cap costs nothing in
-/// determinism; CanSettleOnTile feeds a per-tile cache and must not depend on when it is called.
+/// site is being selected, instead of having CanSettleOnTile answer differently during quest
+/// generation. The query compares the tile's own hilliness, so the cap is deterministic, whereas
+/// CanSettleOnTile feeds a per-tile cache and must not depend on when it is called.
 /// </summary>
 [PatchGroup("Main")]
 [HarmonyPatch(typeof(FastTileFinder))]
 internal static class Patch_RimWorld_FastTileFinder_SiteQuery
 {
-    private static readonly Type Self = typeof(Patch_RimWorld_FastTileFinder_SiteQuery);
-
     [HarmonyPrefix]
     [HarmonyPatch(nameof(FastTileFinder.Query))]
     [HarmonyPriority(Priority.High)]

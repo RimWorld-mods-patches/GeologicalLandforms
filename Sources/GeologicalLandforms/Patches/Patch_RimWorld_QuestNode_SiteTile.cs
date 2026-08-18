@@ -39,6 +39,10 @@ internal static class Patch_RimWorld_QuestNode_SiteTile
             AccessTools.Method(typeof(QuestNode_Root_ArchonexusVictory_ThirdCycle), "TryFindSiteTile"),
 
             // Runtime fallback: picks a tile when a quest reaches spawn time without one assigned.
+            // QuestGen.Working is already false by then, so the old check never covered this path.
+            //
+            // QuestNode_Root_Site is deliberately absent: it defaults maxHilliness to Mountainous
+            // and so caps itself, unless a def raises it, which is that def author's decision.
             AccessTools.Method(typeof(QuestPart_SpawnWorldObject), nameof(QuestPart_SpawnWorldObject.Notify_QuestSignalReceived))
         };
 
@@ -56,7 +60,7 @@ internal static class Patch_RimWorld_QuestNode_SiteTile
     [HarmonyPrefix]
     private static void Prefix(ref bool __state)
     {
-        // Several of these recurse (ArchonexusVictory calls itself with exitOnFirstTileFound), so
+        // These nest: a patched method can run while another is still on the stack, so
         // restore the previous value instead of assuming the flag was clear on entry.
         __state = _inQuestSiteSelection;
         _inQuestSiteSelection = true;
